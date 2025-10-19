@@ -1,0 +1,34 @@
+import os
+import whisper
+
+# 🔧 Directories
+AUDIO_DIR = "/home/ola/Documents/audio"
+OUTPUT_DIR = "/home/ola/Documents/transcripts"
+MODEL_SIZE = "large" # Use the most accurate model
+
+# 🧠 Load the large model (CPU-only)
+print(f"Loading Whisper model: {MODEL_SIZE} (this may take a few minutes)...")
+model = whisper.load_model(MODEL_SIZE)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+# 🧩 Process audio files
+for file_name in os.listdir(AUDIO_DIR):
+    if file_name.lower().endswith((".mp3", ".wav", ".m4a", ".flac", ".ogg")):
+    	output_path = os.path.join(OUTPUT_DIR, f"{os.path.splitext(file_name)[0]}.txt")
+
+	if os.path.exists(output_path):
+		print(f"⏭️ Skipping {file_name} (already done)")
+		continue
+
+	audio_path = os.path.join(AUDIO_DIR, file_name)
+	print(f"🎧 Transcribing: {audio_path} ...")
+
+	# 🧠 Transcribe using CPU-friendly settings
+	result = model.transcribe(audio_path, fp16=False, verbose=True)
+
+	with open(output_path, "w", encoding="utf-8") as f:
+		f.write(result["text"])
+
+	print(f"✅ Saved: {output_path}")
+
+print("\nAll files processed successfully!")
